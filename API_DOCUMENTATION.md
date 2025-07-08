@@ -42,7 +42,8 @@ Register a new user account.
   "email": "user@example.com",
   "password": "SecurePass123",
   "firstName": "John",
-  "lastName": "Doe"
+  "lastName": "Doe",
+  "dateOfBirth": "1990-01-01"
 }
 ```
 
@@ -57,8 +58,9 @@ Register a new user account.
       "email": "user@example.com",
       "firstName": "John",
       "lastName": "Doe",
-      "emailVerified": false,
+      "dateOfBirth": "1990-01-01",
       "isActive": true,
+      "lastLoginAt": "2024-01-01T00:00:00.000Z",
       "createdAt": "2024-01-01T00:00:00.000Z",
       "updatedAt": "2024-01-01T00:00:00.000Z"
     },
@@ -110,7 +112,7 @@ Authenticate user and receive JWT token.
       "email": "user@example.com",
       "firstName": "John",
       "lastName": "Doe",
-      "emailVerified": false,
+      "dateOfBirth": "1990-01-01",
       "isActive": true,
       "lastLoginAt": "2024-01-01T00:00:00.000Z"
     },
@@ -151,7 +153,7 @@ Authorization: Bearer <jwt_token>
       "email": "user@example.com",
       "firstName": "John",
       "lastName": "Doe",
-      "emailVerified": false,
+      "dateOfBirth": "1990-01-01",
       "isActive": true,
       "lastLoginAt": "2024-01-01T00:00:00.000Z"
     }
@@ -185,7 +187,8 @@ Authorization: Bearer <jwt_token>
 ```json
 {
   "firstName": "Jane",
-  "lastName": "Smith"
+  "lastName": "Smith",
+  "dateOfBirth": "1990-01-01"
 }
 ```
 
@@ -200,7 +203,7 @@ Authorization: Bearer <jwt_token>
       "email": "user@example.com",
       "firstName": "Jane",
       "lastName": "Smith",
-      "emailVerified": false,
+      "dateOfBirth": "1990-01-01",
       "isActive": true,
       "lastLoginAt": "2024-01-01T00:00:00.000Z"
     }
@@ -208,11 +211,41 @@ Authorization: Bearer <jwt_token>
 }
 ```
 
-### 6. Change Password
+### 6. Request Password Change OTP
 
-**PUT** `/api/auth/change-password`
+**POST** `/api/auth/request-password-change-otp`
 
-Change user's password.
+Request an OTP to change password (requires authentication).
+
+**Headers:**
+```
+Authorization: Bearer <jwt_token>
+```
+
+**Response (200):**
+```json
+{
+  "success": true,
+  "message": "OTP sent to your email for password change"
+}
+```
+
+**Email Error (500):**
+```json
+{
+  "success": false,
+  "error": {
+    "message": "Failed to send OTP email. Please try again.",
+    "type": "EmailError"
+  }
+}
+```
+
+### 7. Change Password with OTP
+
+**POST** `/api/auth/change-password-with-otp`
+
+Change password using OTP (requires authentication).
 
 **Headers:**
 ```
@@ -222,7 +255,7 @@ Authorization: Bearer <jwt_token>
 **Request Body:**
 ```json
 {
-  "currentPassword": "OldPass123",
+  "otp": "123456",
   "newPassword": "NewSecurePass123"
 }
 ```
@@ -240,105 +273,42 @@ Authorization: Bearer <jwt_token>
 {
   "success": false,
   "error": {
-    "message": "Current password is incorrect",
+    "message": "Invalid or expired OTP",
     "type": "ValidationError"
   }
 }
 ```
 
-### 7. Request Password Reset
+### 8. Get Current User (Alternative)
 
-**POST** `/api/auth/forgot-password`
+**GET** `/api/auth/me`
 
-Request a password reset token.
-
-**Request Body:**
-```json
-{
-  "email": "user@example.com"
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "If an account with this email exists, a password reset link has been sent"
-}
-```
-
-### 8. Reset Password
-
-**POST** `/api/auth/reset-password`
-
-Reset password using token.
-
-**Request Body:**
-```json
-{
-  "token": "reset_token_here",
-  "password": "NewSecurePass123"
-}
-```
-
-**Response (200):**
-```json
-{
-  "success": true,
-  "message": "Password reset successfully"
-}
-```
-
-**Validation Error (400):**
-```json
-{
-  "success": false,
-  "error": {
-    "message": "Invalid or expired reset token",
-    "type": "ValidationError"
-  }
-}
-```
-
-### 9. Update Password
-
-**PUT** `/api/auth/update-password`
-
-Update user's password (requires current password).
+Get current user's information (alternative to /profile).
 
 **Headers:**
 ```
 Authorization: Bearer <jwt_token>
 ```
 
-**Request Body:**
-```json
-{
-  "currentPassword": "CurrentPass123",
-  "newPassword": "NewSecurePass123"
-}
-```
-
 **Response (200):**
 ```json
 {
   "success": true,
-  "message": "Password updated successfully"
-}
-```
-
-**Validation Error (400):**
-```json
-{
-  "success": false,
-  "error": {
-    "message": "Current password is incorrect",
-    "type": "ValidationError"
+  "data": {
+    "user": {
+      "id": "550e8400-e29b-41d4-a716-446655440001",
+      "email": "user@example.com",
+      "firstName": "John",
+      "lastName": "Doe",
+      "dateOfBirth": "1990-01-01",
+      "isActive": true,
+      "lastLoginAt": "2024-01-01T00:00:00.000Z"
+    }
   }
 }
 ```
 
-### 10. Logout
+### 9. Logout
 
 **POST** `/api/auth/logout`
 
@@ -454,7 +424,8 @@ curl -X POST http://localhost:3000/api/auth/signup \
     "email": "newuser@example.com",
     "password": "SecurePass123",
     "firstName": "New",
-    "lastName": "User"
+    "lastName": "User",
+    "dateOfBirth": "1990-01-01"
   }'
 ```
 
@@ -486,22 +457,31 @@ curl -X PUT http://localhost:3000/api/auth/profile \
   }'
 ```
 
-**Update password:**
+**Request password change OTP:**
 ```bash
-curl -X PUT http://localhost:3000/api/auth/update-password \
+curl -X POST http://localhost:3000/api/auth/request-password-change-otp \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+```
+
+**Change password with OTP:**
+```bash
+curl -X POST http://localhost:3000/api/auth/change-password-with-otp \
   -H "Authorization: Bearer YOUR_JWT_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
-    "currentPassword": "CurrentPass123",
+    "otp": "123456",
     "newPassword": "NewSecurePass123"
   }'
 ```
 
 ## Security Notes
 
-1. **Password Requirements**: Minimum 6 characters, must contain uppercase, lowercase, and number
+1. **Password Requirements**: Minimum 6 characters
 2. **JWT Tokens**: Expire after 24 hours (configurable)
 3. **Rate Limiting**: Prevents abuse and brute force attacks
 4. **Input Validation**: All inputs are validated and sanitized
 5. **CORS**: Configured for cross-origin requests
-6. **Security Headers**: Implemented with helmet middleware 
+6. **Security Headers**: Implemented with helmet middleware
+7. **OTP Expiration**: OTP tokens expire after 10 minutes
+8. **Password Reset Tokens**: Expire after 1 hour
+9. **Email Verification**: OTP-based password changes require email verification 

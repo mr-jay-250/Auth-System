@@ -45,19 +45,6 @@ const validateProfileUpdate = [
   validate
 ];
 
-// Password reset request validation
-const validatePasswordResetRequest = [
-  body('email').isEmail().withMessage('Please provide a valid email address'),
-  validate
-];
-
-// Password reset validation
-const validatePasswordReset = [
-  body('token').notEmpty().withMessage('Reset token is required'),
-  body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
-  validate
-];
-
 // OTP validation
 const validateOTP = [
   body('otp').isLength({ min: 6, max: 6 }).withMessage('OTP must be 6 digits'),
@@ -74,8 +61,6 @@ module.exports = {
   validateSignUp,
   validateSignIn,
   validateProfileUpdate,
-  validatePasswordResetRequest,
-  validatePasswordReset,
   validateOTP,
   validateNewPassword
 }; 

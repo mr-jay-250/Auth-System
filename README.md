@@ -7,7 +7,6 @@ A secure Node.js authentication API with JWT tokens, OTP-based password changes 
 - **User Registration & Login** with JWT tokens
 - **Profile Management** - view and update user information
 - **OTP-based Password Change** - secure password updates via email OTP
-- **Password Reset** - forgot password functionality with email links
 - **Email Integration** - actual email sending with nodemailer
 - **Rate Limiting** - protection against abuse
 - **Input Validation** - comprehensive request validation
@@ -19,8 +18,6 @@ A secure Node.js authentication API with JWT tokens, OTP-based password changes 
 ### Public Routes
 - `POST /api/auth/signup` - Register new user
 - `POST /api/auth/signin` - User login
-- `POST /api/auth/forgot-password` - Request password reset
-- `POST /api/auth/reset-password` - Reset password with token
 
 ### Protected Routes
 - `GET /api/auth/profile` - Get user profile
@@ -131,9 +128,6 @@ See `EMAIL_SETUP.md` for detailed email configuration instructions.
 # Start backend
 npm start
 
-# Start frontend (in another terminal)
-cd frontend
-npm start
 ```
 
 ## Testing
@@ -142,7 +136,6 @@ npm start
 2. Login to access protected routes
 3. Test password change with OTP
 4. Test profile management
-5. Test password reset functionality
 
 ## Database Schema
 
@@ -275,4 +268,8 @@ MIT License - see LICENSE file for details
 
 ## Support
 
-For support, please open an issue in the repository or contact the development team. 
+For support, please open an issue in the repository or contact the development team.
+
+## Note
+
+There is currently no frontend; this is a backend-only API project. 

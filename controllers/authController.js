@@ -224,87 +224,6 @@ const changePasswordWithOTP = async (req, res, next) => {
   }
 };
 
-// Request password reset (for forgot password)
-const requestPasswordReset = async (req, res, next) => {
-  try {
-    const { email } = req.body;
-
-    const user = await User.findByEmail(email);
-    if (!user) {
-      // Don't reveal if user exists or not for security
-      return res.status(200).json({
-        success: true,
-        message: 'If an account with this email exists, a password reset link has been sent'
-      });
-    }
-
-    // Generate reset token
-    const resetToken = generateToken();
-    const resetExpires = new Date(Date.now() + 3600000); // 1 hour
-
-    await user.update({
-      passwordResetToken: resetToken,
-      passwordResetExpires: resetExpires
-    });
-
-    // Send password reset email
-    const emailSent = await sendPasswordResetEmail(
-      user.email, 
-      resetToken, 
-      `${user.firstName} ${user.lastName}`
-    );
-
-    if (!emailSent) {
-      return res.status(500).json({
-        success: false,
-        error: {
-          message: 'Failed to send password reset email. Please try again.',
-          type: 'EmailError'
-        }
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      message: 'If an account with this email exists, a password reset link has been sent'
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// Reset password
-const resetPassword = async (req, res, next) => {
-  try {
-    const { token, password } = req.body;
-
-    const user = await User.findByPasswordResetToken(token);
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          message: 'Invalid or expired reset token',
-          type: 'ValidationError'
-        }
-      });
-    }
-
-    // Update password and clear reset token
-    await user.update({
-      password,
-      passwordResetToken: null,
-      passwordResetExpires: null
-    });
-
-    res.status(200).json({
-      success: true,
-      message: 'Password reset successfully'
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 // Logout (client-side token removal)
 const logout = async (req, res, next) => {
   try {
@@ -324,7 +243,5 @@ module.exports = {
   updateProfile,
   requestPasswordChangeOTP,
   changePasswordWithOTP,
-  requestPasswordReset,
-  resetPassword,
   logout
 }; 

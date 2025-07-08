@@ -30,8 +30,6 @@ const {
 // Public routes
 router.post('/signup', validateSignUp, signUp);
 router.post('/signin', validateSignIn, signIn);
-router.post('/forgot-password', validatePasswordResetRequest, requestPasswordReset);
-router.post('/reset-password', validatePasswordReset, resetPassword);
 
 // Protected routes
 router.get('/profile', authenticateToken, getProfile);
